@@ -1,8 +1,8 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
 import Layout from '@/views/Layout'
-const Home = () => import('@/views/Video')
-const Video = () => import('@/views/Home')
+const Home = () => import('@/views/Home')
+const Video = () => import('@/views/Video')
 const Question = () => import('@/views/Question')
 const My = () => import('@/views/My')
 const Login = () => import('@/views/Login')
