@@ -78,6 +78,7 @@ export default {
         const res = await login(values)
         console.log(res)
         this.$store.commit('setUser', res.data.data)
+        this.$router.push({ name: 'my' })
       } catch (err) {
         console.log(err)
       }
