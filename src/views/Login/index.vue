@@ -1,6 +1,6 @@
 <template>
   <div>
-    <van-nav-bar title="登录">
+    <van-nav-bar title="登录" @click-left="$router.back()">
       <van-icon name="cross" slot="left" />
     </van-nav-bar>
     <van-form @submit="onSubmit" ref="form">
@@ -66,7 +66,7 @@ export default {
   created () { },
   data () {
     return {
-      mobile: '13911111111',
+      mobile: '13910090319',
       code: '246810',
       time: 5 * 1000,
       isCountDownShow: false

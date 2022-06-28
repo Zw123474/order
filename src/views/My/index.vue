@@ -1,41 +1,41 @@
 <template>
   <div>
     <!-- 登陆后 -->
-    <div class="header header-login" v-if="flag">
+    <div class="header header-login" v-if="user && user.token">
       <div class="avatar">
         <div class="left">
           <van-image
             width="1.76rem"
             height="1.76rem"
             round
-            src="https://img01.yzcdn.cn/vant/cat.jpeg"
+            :src="userInfo.photo"
           ></van-image>
-          <span>黑马头条号</span>
+          <span>{{ userInfo.name }}</span>
         </div>
         <div class="btn">编辑资料</div>
       </div>
       <ul class="list">
         <li>
-          <p>8</p>
+          <p>{{ userInfo.art_count }}</p>
           <p>头条</p>
         </li>
         <li>
-          <p>8</p>
-          <p>头条</p>
+          <p>{{ userInfo.fans_count }}</p>
+          <p>粉丝</p>
         </li>
         <li>
-          <p>8</p>
-          <p>头条</p>
+          <p>{{ userInfo.follow_count }}</p>
+          <p>关注</p>
         </li>
         <li>
-          <p>8</p>
-          <p>头条</p>
+          <p>{{ userInfo.like_count }}</p>
+          <p>获赞</p>
         </li>
       </ul>
     </div>
     <!-- 未登录 -->
     <div class="header header-notlogin" v-else>
-      <div class="inner">
+      <div class="inner" @click="$router.push('/login')">
         <img src="@/assets/mobile.png" alt="" />
         <p>登录/注册</p>
       </div>
@@ -53,23 +53,54 @@
       </van-grid-item>
     </van-grid>
     <van-cell-group>
-      <van-cell title="消息通知" is-link/>
-      <van-cell title="小智同学" is-link/>
+      <van-cell title="消息通知" is-link />
+      <van-cell title="小智同学" is-link />
     </van-cell-group>
-    <van-button class="logout" type="default" block>退出登录</van-button>
+    <van-button
+      class="logout"
+      type="default"
+      block
+      v-if="user && user.token"
+      @click="logout"
+      >退出登录</van-button
+    >
   </div>
 </template>
 
 <script>
+import { getUserInfo } from '@/api/user'
+import { mapState } from 'vuex'
 export default {
-  created () { },
-  data () {
-    return {
-      flag: true
+  name: 'My',
+  async created () {
+    if (this.user && this.user.token) {
+      try {
+        const res = await getUserInfo()
+        console.log('res', res)
+        this.userInfo = res.data.data
+      } catch (err) {
+        console.log(err)
+      }
     }
   },
-  methods: {},
-  computed: {},
+  data () {
+    return {
+      userInfo: {}
+    }
+  },
+  methods: {
+    async logout () {
+      try {
+        await this.$dialog.confirm({ message: '确定退出吗' })
+        this.$store.commit('setUser', {})
+      } catch (err) {
+        console.log(err)
+      }
+    }
+  },
+  computed: {
+    ...mapState(['user'])
+  },
   watch: {},
   filters: {},
   components: {}
@@ -163,10 +194,10 @@ export default {
 /deep/ .van-grid-item__text {
   font-size: 28px;
 }
-.van-cell-group{
-margin: 9px 0;
+.van-cell-group {
+  margin: 9px 0;
 }
 .logout {
-  color:#d86262
+  color: #d86262;
 }
 </style>
