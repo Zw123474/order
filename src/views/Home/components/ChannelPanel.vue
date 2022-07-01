@@ -48,7 +48,9 @@
 </template>
 
 <script>
-import { getAllArticleList } from '@/api/home'
+import { setItem } from '@/utils/storage'
+import { getAllArticleList, saveChannels } from '@/api/home'
+const CHANNELS = 'CHANNELS'
 export default {
   props: {
     channels: {
@@ -95,14 +97,13 @@ export default {
       this.recommendChannels.splice(index, 1)
     },
     onClick (index) {
-      if (index !== 0) {
-        if (this.isCloseShow) {
-          const obj = this.channels[index]
-          this.channels.splice(index, 1)
-          this.recommendChannels.push(obj)
-          if (index < this.active) {
-            this.$emit('del-event', this.active - 1)
-          }
+      if (this.isCloseShow) {
+        if (index === 0) return
+        const obj = this.channels[index]
+        this.channels.splice(index, 1)
+        this.recommendChannels.push(obj)
+        if (index < this.active) {
+          this.$emit('del-event', this.active - 1)
         }
       } else {
         this.$emit('change-active', index)
@@ -110,7 +111,31 @@ export default {
     }
   },
   computed: {},
-  watch: {},
+  watch: {
+    watch: {
+      channels: {
+        async handler (newVal) {
+          if (this.$store.state.user && this.$store.state.user.token) {
+            const arr = []
+            newVal.forEach((item, index) => {
+              arr.push({ id: item.id, seq: index })
+            })
+            console.log(arr)
+            try {
+              const res = await saveChannels(arr)
+              console.log(res)
+            } catch (err) {
+              console.log(err)
+            }
+            // 登陆过
+          } else {
+            setItem(CHANNELS, newVal)
+          }
+        },
+        deep: true
+      }
+    }
+  },
   filters: {},
   components: {}
 }

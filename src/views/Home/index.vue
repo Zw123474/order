@@ -42,6 +42,8 @@
 import ChannelPanel from './components/ChannelPanel.vue'
 import { getMyChannels } from '@/api/home'
 import ArticleList from '@/components/ArticleList.vue'
+import { getItem } from '@/utils/storage'
+const CHANNELS = 'CHANNELS'
 export default {
   name: 'Home',
   created () {
@@ -56,17 +58,37 @@ export default {
   },
   methods: {
     async getMyChannels () {
-      try {
-        const res = await getMyChannels()
-        console.log('res', res)
-        this.channels = res.data.data.channels
-      } catch (err) {
-        console.log(err)
+      const channels = getItem(CHANNELS)
+      if (!(this.$store.state.user && this.$store.state.user.token) && channels) {
+        this.channels = channels
+      } else {
+        try {
+          const res = await getMyChannels()
+          this.channels = res.data.data.channels
+        } catch (err) {
+          console.log(err)
+        }
       }
     }
   },
   computed: {},
-  watch: {},
+  watch: {
+    // channels: {
+    //   handler (newVal) {
+    //     if (this.$store.state.user && this.$store.state.user.token) {
+    //       const arr = []
+    //       newVal.forEach((item, index) => {
+    //         arr.push({ id: item.id, seq: index })
+    //       })
+    //       console.log(arr)
+    //       // 登陆过
+    //     } else {
+    //       setItem(CHANNELS, newVal)
+    //     }
+    //   },
+    //   deep: true
+    // }
+  },
   filters: {},
   components: {
     ArticleList,
