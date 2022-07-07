@@ -19,3 +19,29 @@ export const getUserInfo = () => {
     url: 'user'
   })
 }
+
+export const getUserProfile = () => {
+  return request({
+    url: 'user/profile'
+  })
+}
+
+export const updateUserProfile = profile => {
+  return request({
+    method: 'PATCH',
+    url: 'user/profile',
+    data: profile
+  })
+}
+/**
+ *
+ * @param {裁剪之后的头像数据} data
+ * @returns
+ */
+export const updateAvatar = data => {
+  return request({
+    method: 'PATCH',
+    url: 'user/photo',
+    data
+  })
+}
