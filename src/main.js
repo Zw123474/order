@@ -11,6 +11,11 @@ import 'amfe-flexible'
 import '@/styles/index.less'
 
 import * as obj from '@/filters'
+import HmIcon from '@/components/HmIcon.vue'
+import FollowUser from '@/components/FollowUser.vue'
+import '@/components'
+Vue.component('HmIcon', HmIcon)
+Vue.component(FollowUser.name, FollowUser)
 
 Vue.use(Vant)
 Object.keys(obj).forEach(key => {
