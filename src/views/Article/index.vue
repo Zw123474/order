@@ -4,7 +4,7 @@
     <van-nav-bar
       class="page-nav-bar"
       left-arrow
-      title="黑马头条"
+      title="京云头条"
       @click-left="$router.back()"
     ></van-nav-bar>
     <!-- /导航栏 -->
@@ -32,7 +32,7 @@
               fit="cover"
               :src="article.auto_photo"
             />
-            <div slot="title" class="user-name">{{ article.aut_name }}</div>
+            <div slot="title" class="user-name">京小云</div>
             <div slot="label" class="publish-date">
               {{ article.pubdate | dateformat }}
             </div>
