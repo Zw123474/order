@@ -2,13 +2,14 @@ import Vue from 'vue'
 import VueRouter from 'vue-router'
 import Layout from '@/views/Layout'
 const Home = () => import('@/views/Home')
-const Video = () => import('@/views/Video')
-const Question = () => import('@/views/Question')
+const WorkOrderList = () => import('@/views/WorkOrderList-cus')
+const Notice = () => import('@/views/Notice')
 const My = () => import('@/views/My')
-const Login = () => import('@/views/Login')
-const Search = () => import('@/views/Search')
-const Article = () => import('@/views/Article')
-const User = () => import('@/views/user')
+const CheckDetails = () => import('@/views/workOrderDetails/check.vue')
+const EditDetails = () => import('@/views/workOrderDetails/edit.vue')
+const AddWorkOrder = () => import('@/views/addWorkOrder')
+const Replenish = () => import('@/views/workOrderDetails/replenish.vue')
+const NoticeDetails = () => import('@/views/Notice/details.vue')
 
 Vue.use(VueRouter)
 
@@ -16,17 +17,19 @@ const routes = [
   {
     path: '/',
     component: Layout,
+    redirect: 'home',
     children: [
-      { path: 'home', component: Home },
-      { path: 'video', component: Video },
-      { path: 'question', component: Question },
-      { path: 'my', component: My, name: 'my' }
+      { path: 'home', component: Home, name:'home' },
+      { path: 'addWorkOrder', component: AddWorkOrder, name: 'addWorkOrder' },
+      { path: 'workOrderList', component: WorkOrderList, name: 'workOrderList' },
+      { path: 'notice', component: Notice, name:'notice' },
+      { path: 'my', component: My, name: 'my' },
+      { path: 'editDetails', component: EditDetails, name: 'editDetails' },
+      { path: 'checkDetails', component: CheckDetails, name: 'checkDetails' },
+      { path: 'replenish', component: Replenish, name: 'replenish' },
+      { path: 'noticeDetails', component: NoticeDetails, name: 'noticeDetails' },
     ]
   },
-  { path: '/login', component: Login },
-  { path: '/search', component: Search },
-  { path: '/article/:article_id', component: Article, name: 'article', props: true },
-  { path: '/user', component: User }
 ]
 
 const router = new VueRouter({

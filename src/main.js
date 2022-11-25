@@ -9,13 +9,15 @@ import 'amfe-flexible'
 // import '@/styles/icon.less'
 // import '@/styles/reset.less'
 import '@/styles/index.less'
-
+import '@/icons' // icon
 import * as obj from '@/filters'
-import HmIcon from '@/components/HmIcon.vue'
-import FollowUser from '@/components/FollowUser.vue'
-import '@/components'
-Vue.component('HmIcon', HmIcon)
-Vue.component(FollowUser.name, FollowUser)
+
+import Vconsole from 'vconsole'
+let vConsole = new Vconsole()
+Vue.use(vConsole)
+
+import Apis from '@/api'
+Vue.prototype.$Apis = Apis
 
 Vue.use(Vant)
 Object.keys(obj).forEach(key => {

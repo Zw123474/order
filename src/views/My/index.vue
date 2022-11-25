@@ -1,203 +1,238 @@
 <template>
   <div>
-    <!-- 登陆后 -->
-    <div class="header header-login" v-if="user && user.token">
+    <!-- 导航栏 -->
+    <van-nav-bar class="page-nav-bar" left-arrow title="我的" @click-left="$router.back()"></van-nav-bar>
+    <!-- /导航栏 -->
+    <div class="bluebg">
       <div class="avatar">
         <div class="left">
-          <van-image
-            width="1.76rem"
-            height="1.76rem"
-            round
-            :src="userInfo.photo"
-          ></van-image>
-          <span>{{ userInfo.name }}</span>
+          <van-image width="1.76rem" height="1.76rem" round v-if="userInfo.headUrl" :src="userInfo.headUrl" fit="cover"></van-image>
+          <van-image width="1.76rem" height="1.76rem" round v-else src="https://img01.yzcdn.cn/vant/cat.jpeg" fit="cover"></van-image>
         </div>
-        <div class="btn" @click="$router.push('/user')">编辑资料</div>
-      </div>
-      <ul class="list">
-        <li>
-          <p>{{ userInfo.art_count }}</p>
-          <p>头条</p>
-        </li>
-        <li>
-          <p>{{ userInfo.fans_count }}</p>
-          <p>粉丝</p>
-        </li>
-        <li>
-          <p>{{ userInfo.follow_count }}</p>
-          <p>关注</p>
-        </li>
-        <li>
-          <p>{{ userInfo.like_count }}</p>
-          <p>获赞</p>
-        </li>
-      </ul>
-    </div>
-    <!-- 未登录 -->
-    <div class="header header-notlogin" v-else>
-      <div class="inner" @click="$router.push('/login')">
-        <img src="@/assets/mobile.png" alt="" />
-        <p>登录/注册</p>
+        <div class="right">
+          <div class="namePosition">
+            <h3>{{userInfo.userName}}</h3>
+            <p v-if="userInfo.title">{{userInfo.isTotalSchedule == 1 ? '总调度' : userInfo.isDepartmentHeads == 1 ? '部门主管' : '运维人员'}} | {{userInfo.title}}</p>
+            <p v-else>{{userInfo.isTotalSchedule == 1 ? '总调度' : userInfo.isDepartmentHeads == 1 ? '部门主管' : '运维人员'}}</p>
+          </div>
+          <span>{{userInfo.phone}}</span>
+        </div>
       </div>
     </div>
-    <van-grid :column-num="2">
-      <van-grid-item text="收藏">
-        <template #icon>
-          <i class="toutiao toutiao-shoucang"></i>
-        </template>
-      </van-grid-item>
-      <van-grid-item text="历史">
-        <template #icon>
-          <i class="toutiao toutiao-lishi"></i>
-        </template>
-      </van-grid-item>
-    </van-grid>
-    <van-cell-group>
-      <van-cell title="消息通知" is-link />
-      <van-cell title="小智同学" is-link />
-    </van-cell-group>
-    <van-button
-      class="logout"
-      type="default"
-      block
-      v-if="user && user.token"
-      @click="logout"
-      >退出登录</van-button
-    >
+    <div class="main-wrap">
+      <van-row>
+        <van-col span="10" v-for="(order,index) in order" :key="index">
+          <van-cell value="内容">
+            <template #title>
+              <div class="orderType">{{order.type}}</div>
+              <div class="num">{{order.num}}</div>
+            </template>
+            <template #default>
+              <div>
+                <van-icon class="icon" name="weapp-nav" />
+              </div>
+            </template>
+          </van-cell>
+        </van-col>
+      </van-row>
+      <div class="notice">
+        <van-cell title="公示公告" icon="orders-o" :value="noticeTotal" is-link to="./notice" style="background-color:#F8F9FF" />
+      </div>
+    </div>
   </div>
 </template>
-
 <script>
-import { getUserInfo } from '@/api/user'
-import { mapState } from 'vuex'
 export default {
-  name: 'My',
-  async created () {
-    if (this.user && this.user.token) {
-      try {
-        const res = await getUserInfo()
-        console.log('res', res)
-        this.userInfo = res.data.data
-      } catch (err) {
-        console.log(err)
-      }
-    }
+  name: 'checkDetails',
+  props: {
   },
   data () {
     return {
-      userInfo: {}
+      avatar: 'https://img01.yzcdn.cn/vant/cat.jpeg',
+      name: '许三多',
+      phone: '15695468124',
+      order: [{ type: '运维工单总数', num: '' }, { type: '待接单', num: '' }, { type: '退回', num: '' }, { type: '处理中', num: '' }, { type: '处理完成待接单', num: '' }, { type: '已驳回', num: '' }, { type: '完结', num: '' }
+      ],
+      userInfo: {},
+      nickName: '',
+      noticeTotal: '',
     }
+  },
+  computed: {},
+  watch: {
+  },
+  created () {
+    this.noticeTotal = localStorage.getItem('noticeTotal')
+  },
+  mounted () {
+    this.userInfo = JSON.parse(localStorage.getItem('userInfo'))
+    console.log(this.userInfo);
+    console.log(JSON.parse(localStorage.getItem('userInfo')));
+    this.getWorkOrderList()
+    this.getWorkOrderList1()
+    this.getWorkOrderList2()
+    this.getWorkOrderList3()
+    this.getWorkOrderList4()
+    this.getWorkOrderList5()
+    this.getWorkOrderList6()
   },
   methods: {
-    async logout () {
-      try {
-        await this.$dialog.confirm({ message: '确定退出吗' })
-        this.$store.commit('setUser', {})
-      } catch (err) {
-        console.log(err)
+    getWorkOrderList () {
+      let data = {
+        current: 1,
+        size: 9999,
+        isTransferOrder: 0,
       }
-    }
-  },
-  computed: {
-    ...mapState(['user'])
-  },
-  watch: {},
-  filters: {},
-  components: {}
+      this.$Apis.getWorkOrder(data).then(res => {
+        this.order[0].num = res.data.total
+      })
+    },
+    getWorkOrderList1 () {
+      let data = {
+        current: 1,
+        size: 9999,
+        isTransferOrder: 0,
+        workOrderStatus: 'PENDING_ORDER'
+      }
+      this.$Apis.getWorkOrder(data).then(res => {
+        this.order[1].num = res.data.total
+      })
+    },
+    getWorkOrderList2 () {
+      let data = {
+        current: 1,
+        size: 9999,
+        isTransferOrder: 0,
+        workOrderStatus: 'RETURN'
+      }
+      this.$Apis.getWorkOrder(data).then(res => {
+        this.order[2].num = res.data.total
+      })
+    },
+    getWorkOrderList3 () {
+      let data = {
+        current: 1,
+        size: 9999,
+        isTransferOrder: 0,
+        workOrderStatus: 'PROCESSING'
+      }
+      this.$Apis.getWorkOrder(data).then(res => {
+        this.order[3].num = res.data.total
+      })
+    },
+    getWorkOrderList4 () {
+      let data = {
+        current: 1,
+        size: 9999,
+        isTransferOrder: 0,
+        workOrderStatus: 'PENDING_BILL'
+      }
+      this.$Apis.getWorkOrder(data).then(res => {
+        this.order[4].num = res.data.total
+      })
+    },
+    getWorkOrderList5 () {
+      let data = {
+        current: 1,
+        size: 9999,
+        isTransferOrder: 0,
+        workOrderStatus: 'TURN_DOWN'
+      }
+      this.$Apis.getWorkOrder(data).then(res => {
+        this.order[5].num = res.data.total
+      })
+    },
+    getWorkOrderList6 () {
+      let data = {
+        current: 1,
+        size: 9999,
+        isTransferOrder: 0,
+        workOrderStatus: 'CHECK'
+      }
+      this.$Apis.getWorkOrder(data).then(res => {
+        this.order[6].num = res.data.total
+      })
+    },
+  }
 }
 </script>
 
 <style scoped lang="less">
-.header {
-  width: 750px;
-  height: 400px;
-  background: rgb(50, 150, 250, 0.7) url("@/assets/banner.png") no-repeat;
-  background-size: cover;
-}
-.header-notlogin {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  img {
-    width: 132px;
-    height: 132px;
-    margin-bottom: 15px;
-  }
-  p {
-    font-size: 28px;
-    font-weight: normal;
-    color: #ffffff;
-    margin: 0;
-    padding: 0;
-  }
-}
-.header-login {
-  padding-top: 116px;
+.bluebg {
+  height: 300px;
+  width: 100%;
+  position: fixed;
+  top: 90px;
+  background-color: #246ee8;
+  z-index: 2;
   .avatar {
-    margin-bottom: 55px;
-    padding-left: 32px;
+    margin-top: 80px;
+    padding-left: 50px;
     padding-right: 33px;
     display: flex;
-    justify-content: space-between;
     align-items: center;
-    .btn {
-      width: 115px;
-      height: 32px;
-      background: #ffffff;
-      border-radius: 16px;
-      line-height: 32px;
-      text-align: center;
-      font-size: 20px;
-      font-weight: normal;
-      color: #666666;
-    }
-    .left {
+    .right {
       display: flex;
-      align-items: center;
+      flex-direction: column;
+      margin-left: 30px;
+      margin-bottom: 20px;
+      .namePosition {
+        display: flex;
+        align-items: center;
+        h3 {
+          font-size: 40px;
+          color: #fff;
+          margin-bottom: 10px;
+        }
+        p {
+          font-size: 28px;
+          color: #fff;
+          margin-left: 20px;
+          border: 1px solid #fff;
+          border-radius: 20px;
+          padding: 0 10px;
+        }
+      }
       span {
-        margin-left: 22px;
-        font-size: 30px;
-        font-weight: normal;
-        color: #fff;
-      }
-    }
-  }
-  .list {
-    display: flex;
-    li {
-      flex: 1;
-      text-align: center;
-      p {
-        color: #fff;
-        font-weight: normal;
-        &:nth-child(1) {
-          font-size: 36px;
-        }
-        &:nth-child(2) {
-          font-size: 23px;
-        }
+        font-size: 28px;
+        color: #ffffff;
       }
     }
   }
 }
-.toutiao {
-  font-size: 45px;
-}
-.van-grid-item {
-  &:nth-child(1) {
-    color: #eb5253;
+.main-wrap {
+  position: fixed;
+  left: 0;
+  right: 0;
+  top: 350px;
+  bottom: 100px;
+  border-radius: 50px 50px 0 0;
+  overflow-y: scroll;
+  background-color: #f8f9ff;
+  z-index: 3;
+  padding: 50px 50px;
+  .orderType {
+    font-size: 24px;
+    color: #414149;
+    white-space: nowrap;
   }
-  &:nth-child(2) {
-    color: #ff9d1d;
+  .num {
+    font-size: 48px;
+    margin-top: 10px;
   }
-}
-/deep/ .van-grid-item__text {
-  font-size: 28px;
-}
-.van-cell-group {
-  margin: 9px 0;
-}
-.logout {
-  color: #d86262;
+  .icon {
+    color: blue;
+  }
+  .van-col {
+    margin: 20px;
+  }
+  .notice {
+    .van-cell__value {
+      color: #e82424;
+    }
+    /deep/.van-cell__left-icon {
+      color: #246ee8;
+    }
+  }
 }
 </style>

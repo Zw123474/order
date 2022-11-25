@@ -1,98 +1,99 @@
 <template>
   <div>
-    <van-nav-bar fixed>
-      <template #title>
-        <van-button type="info" icon="search" class="search-btn" to="/search"
-          >搜索</van-button
-        >
-      </template>
-    </van-nav-bar>
-    <van-tabs v-model="active" animated>
-      <van-tab :title="item.name" v-for="item in channels" :key="item.id">
-        <ArticleList :id="item.id"></ArticleList>
+    <van-nav-bar title="运维工单" />
+    <van-tabs v-model="active" animated background="#246dea" @click="refresh" title-inactive-color="#ccc" title-active-color="white" swipe-threshold="4">
+      <van-tab :title="item.label" v-for="(item,index) in channels" :key="index">
+        <WorkOrderList ref="tabContent" :title="item.label" :type="item.value"></WorkOrderList>
       </van-tab>
       <template #nav-right>
-        <div class="menu" @click="isChannelPanelShow = true">
-          <i class="toutiao toutiao-gengduo"></i>
+        <div class="menu">
+          <van-icon name="search" class="search" @click="isFormShow" />
         </div>
         <div class="menu1"></div>
       </template>
     </van-tabs>
-    <van-popup
-      v-model="isChannelPanelShow"
-      position="bottom"
-      :style="{ height: '100%', paddingTop: '1rem' }"
-      closeable
-      close-icon-position="top-left"
-    >
-      <ChannelPanel
-        :channels="channels"
-        :active="active"
-        @change-active="
-          active = $event;
-          isChannelPanelShow = false;
-        "
-        @del-event="active = $event"
-      ></ChannelPanel>
-    </van-popup>
   </div>
 </template>
 
 <script>
-import ChannelPanel from './components/ChannelPanel.vue'
-import { getMyChannels } from '@/api/home'
-import ArticleList from '@/components/ArticleList.vue'
-import { getItem } from '@/utils/storage'
-const CHANNELS = 'CHANNELS'
+import WorkOrderList from '@/components/WorkOrderList.vue'
 export default {
   name: 'Home',
   created () {
-    this.getMyChannels()
+    if (JSON.parse(localStorage.getItem('userInfo')).isTotalSchedule == '-1') {
+      if (JSON.parse(localStorage.getItem('userInfo')).isDepartmentHeads == '-1') {
+        this.isOperator = 1
+      }
+    }
+    this.delReturn()
   },
   data () {
     return {
+      isOperator: '',
       active: 0,
-      channels: [],
-      isChannelPanelShow: false
+      channels: [{
+        value: "",
+        label: "全部",
+      }, {
+        value: "PENDING_ORDER",
+        label: "待接单",
+      },
+      {
+        value: "PROCESSING",
+        label: "处理中",
+      },
+      {
+        value: "RETURN",
+        label: "退回",
+      },
+      {
+        value: "TURN_DOWN",
+        label: "已驳回",
+      },
+      {
+        value: "PENDING_BILL",
+        label: "处理完成待结单",
+      },
+      {
+        value: "CHECK",
+        label: "已结单",
+      },
+      ],
+      isChannelPanelShow: true,
+      isShow: true,
+      grandson: false
     }
   },
   methods: {
-    async getMyChannels () {
-      const channels = getItem(CHANNELS)
-      if (!(this.$store.state.user && this.$store.state.user.token) && channels) {
-        this.channels = channels
+    refresh(){
+      this.$refs.tabContent.forEach(e =>{
+        return e.onSubmit()
+      })
+    },
+    isFormShow () {
+      if (this.isShow) {
+        this.$refs.tabContent[0].formShow = true
+        this.$refs.tabContent[0].popupheight = "height:65%"
+        this.isShow = false
       } else {
-        try {
-          const res = await getMyChannels()
-          this.channels = res.data.data.channels
-        } catch (err) {
-          console.log(err)
-        }
+        this.$refs.tabContent[0].formShow = false
+        this.$refs.tabContent[0].popupheight = "height:85%"
+        this.isShow = true
       }
-    }
+    },
+    // 判断channels的情况，如果是运维人员，删除退回状态
+    delReturn () {
+      if (this.isOperator == '1') {
+        this.channels.splice(3, 1)
+      }
+    },
   },
   computed: {},
   watch: {
-    // channels: {
-    //   handler (newVal) {
-    //     if (this.$store.state.user && this.$store.state.user.token) {
-    //       const arr = []
-    //       newVal.forEach((item, index) => {
-    //         arr.push({ id: item.id, seq: index })
-    //       })
-    //       console.log(arr)
-    //       // 登陆过
-    //     } else {
-    //       setItem(CHANNELS, newVal)
-    //     }
-    //   },
-    //   deep: true
-    // }
   },
   filters: {},
   components: {
-    ArticleList,
-    ChannelPanel
+    WorkOrderList
   }
 }
 </script>
@@ -101,6 +102,9 @@ export default {
 /deep/.van-nav-bar__title {
   max-width: unset;
 }
+.van-hairline--bottom::after {
+  border-bottom: none;
+}
 .search-btn {
   width: 555px;
   height: 64px;
@@ -108,39 +112,39 @@ export default {
   border-radius: 32px;
 }
 /deep/ .van-tabs__wrap--scrollable .van-tab {
-  padding: 0 69px;
-  border-right: 1px solid #edeff3;
+  padding: 0 30px;
 }
 /deep/ .van-tabs__line {
-  width: 31px;
-  background-color: #3296fa;
+  width: 40px;
+  background-color: #fff;
 }
 .menu {
   min-width: 100px;
   height: 82px;
-  background-color: rgba(255, 255, 255, 0.9);
+  background-color: #246dea;
   position: fixed;
   right: 0;
+  color: #fff;
   text-align: center;
   line-height: 82px;
-  .toutiao {
+  align-items: center;
+  .search {
     font-size: 33px;
   }
 }
 .menu1 {
   min-width: 100px;
   height: 82px;
-  background-color: rgba(255, 255, 255, 0.9);
+  background-color: #246dea;
 }
 /deep/.van-tabs__wrap {
   width: 750px;
   position: fixed;
   top: 92px;
   z-index: 1;
-  border-bottom: 1px solid #edeff3;
 }
 /deep/.van-pull-refresh {
-  height: calc(100vh - 274px);
+  height: calc(100vh - 184px);
   overflow: auto;
 }
 </style>
